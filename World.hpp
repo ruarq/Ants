@@ -12,11 +12,13 @@ public:
 	~World();
 
 public:
-	void Create(olc::PixelGameEngine &context, const unsigned numAnts);
+	void Create(olc::PixelGameEngine &context);
 	void Spawn(GameObject *gameObject);
 
 	void Update(const float dt);
 	void Render(olc::PixelGameEngine &context);
+
+	std::vector<GameObject*> GetAllObjects() const;
 
 private:
 	std::vector<GameObject*> spawnQueue;

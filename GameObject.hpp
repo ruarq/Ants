@@ -11,6 +11,7 @@ public:
 	virtual ~GameObject() = default;
 
 public:
+	virtual void Create(World &world) {};
 	virtual void Update(World &world, const float dt) = 0;
 	virtual void Render(olc::PixelGameEngine &context) = 0;
 

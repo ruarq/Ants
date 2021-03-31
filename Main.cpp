@@ -4,10 +4,9 @@
 #include "olcPixelGameEngine.h"
 
 #include "World.hpp"
+#include "AntHome.hpp"
+#include "FoodSource.hpp"
 #include "Util.hpp"
-
-template<typename T>
-using Ptr = std::unique_ptr<T>;
 
 class Application final : public olc::PixelGameEngine
 {
@@ -16,7 +15,16 @@ public:
 	{
 		sAppName = "Ants";
 
-		world.Create(*this, 1000);
+		world.Create(*this);
+
+		AntHome *antHome = new AntHome(100);
+		antHome->SetPosition(olc::vf2d(this->ScreenWidth() / 2.0f, this->ScreenHeight() / 2.0f));
+
+		FoodSource *foodSource = new CircularFoodSource(100, 15.0f);
+		foodSource->SetPosition(olc::vf2d(500.0f, 200.0f));
+
+		world.Spawn(antHome);
+		world.Spawn(foodSource);
 
 		return true;
 	}
