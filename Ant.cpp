@@ -1,6 +1,11 @@
 #include "Ant.hpp"
 
-void Ant::Update(const float dt)
+Ant::Ant()
+	: pheromoneTimer(pheromoneSpawnDelay)
+{
+}
+
+void Ant::Update(World &world, const float dt)
 {
 	if (velocity.mag() > 0.0f)
 		velocity = velocity.norm() * speed;
@@ -21,7 +26,24 @@ void Ant::Update(const float dt)
 		}
 	}
 
+	// Update the pheromone timer
+	pheromoneTimer -= dt;
+	if (pheromoneTimer <= 0.0f)
+	{
+		Pheromone *pheromone = new Pheromone(PheromoneType::ToHome);
+		pheromone->SetPosition(position);
+		
+		world.Spawn(pheromone);
+
+		pheromoneTimer = pheromoneSpawnDelay;
+	}
+
 	position += velocity * dt;
+}
+
+void Ant::Render(olc::PixelGameEngine &context)
+{
+	context.FillCircle(position, 1.5f);
 }
 
 void Ant::SetVelocity(const olc::vf2d &velocity)

@@ -1,10 +1,13 @@
-#include <iostream>
+#include <memory>
 
 #define OLC_PGE_APPLICATION
 #include "olcPixelGameEngine.h"
 
-#include "Ant.hpp"
+#include "World.hpp"
 #include "Util.hpp"
+
+template<typename T>
+using Ptr = std::unique_ptr<T>;
 
 class Application final : public olc::PixelGameEngine
 {
@@ -13,13 +16,7 @@ public:
 	{
 		sAppName = "Ants";
 
-		for (unsigned i = 0; i < 100; i++)
-		{
-			Ant randomAnt;
-			randomAnt.SetPosition(olc::vf2d(this->ScreenWidth() / 2.0f, this->ScreenHeight() / 2.0f));
-
-			ants.push_back(randomAnt);
-		}
+		world.Create(*this, 1000);
 
 		return true;
 	}
@@ -28,23 +25,14 @@ public:
 	{
 		this->Clear(olc::BLACK);
 
-		for (Ant &ant : ants)
-		{
-			ant.Update(dt);
-			this->DrawAnt(ant);
-		}
+		world.Update(dt);
+		world.Render(*this);
 
 		return true;
 	}
 
 private:
-	void DrawAnt(const Ant &ant)
-	{
-		this->FillCircle(ant.GetPosition(), 1.5f);
-	}
-
-private:
-	std::vector<Ant> ants;
+	World world;
 };
 
 int main()

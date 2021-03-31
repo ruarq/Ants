@@ -2,6 +2,8 @@
 
 #include "olcPixelGameEngine.h"
 
+#include "World.hpp"
+
 class GameObject
 {
 public:
@@ -9,7 +11,8 @@ public:
 	virtual ~GameObject() = default;
 
 public:
-	virtual void Update(const float dt) = 0;
+	virtual void Update(World &world, const float dt) = 0;
+	virtual void Render(olc::PixelGameEngine &context) = 0;
 
 public:
 	void SetPosition(const olc::vf2d &position);
