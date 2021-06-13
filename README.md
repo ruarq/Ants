@@ -1,2 +1,2 @@
 # Ants
-Ant simulation in C++ using the PGE
+Ant simulation in C++ using SFML2.5.1

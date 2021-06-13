@@ -1,0 +1,8 @@
+# Dirs
+[Oo]bj
+[Bb]in
+.vscode
+
+# Files
+*.make
+[Mm]akefile
