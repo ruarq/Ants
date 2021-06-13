@@ -16,6 +16,6 @@ public:
 	void SetPosition(const sf::Vector2f &position);
 	sf::Vector2f GetPosition() const;
 
-private:
+protected:
 	sf::Vector2f position;
 };
