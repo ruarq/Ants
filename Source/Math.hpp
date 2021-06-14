@@ -30,6 +30,18 @@ float Length(const T &vec)
 }
 
 /**
+ * @brief Get the normalized version of a 2d vector
+ * @tparam T The type of the vector
+ * @param vec The vector to be normalized
+ */
+template<typename T>
+T Normalized(const T &vec)
+{
+	const float length = Length(vec);
+	return T(vec.x / length, vec.y / length);
+}
+
+/**
  * @brief Get the angle between to 2d vectors
  * @tparam T The type of the vectors
  * @param a Vector one
@@ -40,4 +52,16 @@ template<typename T>
 float Angle(const T &a, const T &b)
 {
 	return std::acos(Dot(a, b) / (Length(a) * Length(b))) * 180.0f / M_PI;
+}
+
+/**
+ * @brief Get the rotation of a 2d vector (useful to rotate sprites)
+ * @tparam T The type of the vector
+ * @param vec The vector to get the rotation of
+ * @return The rotation of the vector relative to the x-axis of the screen
+ */
+template<typename T>
+float Angle(const T &vec)
+{
+	return std::atan2(vec.y, vec.x) * (180.0f / M_PI) + 90;
 }

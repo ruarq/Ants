@@ -13,5 +13,6 @@ void Food::Update(World &world, const float deltaTime)
 
 void Food::Render(sf::RenderWindow &window)
 {
+	shape.setPosition(position);
 	window.draw(shape);
 }
