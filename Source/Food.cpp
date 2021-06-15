@@ -16,3 +16,13 @@ void Food::Render(sf::RenderWindow &window)
 	shape.setPosition(position);
 	window.draw(shape);
 }
+
+void Food::SetAvailable(const bool isAvailable)
+{
+	this->isAvailable = isAvailable;
+}
+
+bool Food::IsAvailable() const
+{
+	return isAvailable;
+}

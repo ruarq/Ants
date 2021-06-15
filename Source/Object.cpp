@@ -9,3 +9,13 @@ sf::Vector2f Object::GetPosition() const
 {
 	return position;
 }
+
+void Object::SetAlive(const bool isAlive)
+{
+	this->isAlive = isAlive;
+}
+
+bool Object::IsAlive() const
+{
+	return isAlive;
+}

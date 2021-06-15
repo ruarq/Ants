@@ -14,6 +14,10 @@ public:
 	void Update(World &world, const float deltaTime) override;
 	void Render(sf::RenderWindow &window) override;
 
+	void SetAvailable(const bool isAvailable);
+	bool IsAvailable() const;
+
 private:
 	sf::CircleShape shape;
+	bool isAvailable = true;
 };

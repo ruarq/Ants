@@ -15,9 +15,11 @@ ApplicationStateRunning::ApplicationStateRunning()
 	}
 
 	// Spawn some random food
-	for (std::uint32_t i = 0; i < 100; i++)
+	for (std::uint32_t i = 0; i < 1000; i++)
 	{
-
+		Food *newFood = new Food();
+		newFood->SetPosition(sf::Vector2f(Random(100.0f, 1180.0f), Random(100.0f, 620.0f)));
+		world.AddObject(newFood);
 	}
 }
 

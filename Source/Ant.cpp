@@ -1,7 +1,5 @@
 #include "Ant.hpp"
 
-#include <iostream>
-
 Ant::Ant()
 {
 	// Create antSprite
@@ -15,8 +13,15 @@ Ant::Ant()
 
 void Ant::Update(World &world, const float deltaTime)
 {
-	const sf::Vector2f target = FindTarget(world);
-	this->MoveTowards(target, deltaTime);
+	this->HandleFood(world);
+
+	desiredDirection = Normalized(desiredDirection + RandomVec2d() * wanderStrength);
+	const sf::Vector2f desiredVelocity = desiredDirection * maxSpeed;
+	const sf::Vector2f desiredTurnForce = (desiredVelocity - velocity) * turnStrength;
+	const sf::Vector2f acceleration = Clamp(desiredTurnForce, turnStrength);
+
+	velocity = Clamp(velocity + acceleration * deltaTime, maxSpeed);
+	position += velocity * deltaTime;
 }
 
 void Ant::Render(sf::RenderWindow &window)
@@ -26,15 +31,15 @@ void Ant::Render(sf::RenderWindow &window)
 	antSprite.setRotation(Angle(velocity));
 	window.draw(antSprite);
 
-	#if defined(DEBUG)
-	sf::CircleShape viewCircle(viewRadius);
-	viewCircle.setFillColor(sf::Color::Transparent);
-	viewCircle.setOutlineColor(sf::Color::Blue);
-	viewCircle.setOutlineThickness(1.0f);
-	viewCircle.setPosition(position);
-	viewCircle.setOrigin(sf::Vector2f(viewRadius, viewRadius));
-	window.draw(viewCircle);
-	#endif
+	// #if defined(DEBUG)
+	// sf::CircleShape viewCircle(viewRadius);
+	// viewCircle.setFillColor(sf::Color::Transparent);
+	// viewCircle.setOutlineColor(sf::Color::Blue);
+	// viewCircle.setOutlineThickness(1.0f);
+	// viewCircle.setPosition(position);
+	// viewCircle.setOrigin(sf::Vector2f(viewRadius, viewRadius));
+	// window.draw(viewCircle);
+	// #endif
 }
 
 void Ant::SetVelocity(const sf::Vector2f &velocity)
@@ -47,56 +52,35 @@ sf::Vector2f Ant::GetVelocity() const
 	return velocity;
 }
 
-/**
- * @note Thanks to Sebastian Lague for sharing his Ant movement script. I like it a lot!
- */
-void Ant::MoveTowards(const sf::Vector2f &target, const float deltaTime)
+void Ant::HandleFood(const World &world)
 {
-	const sf::Vector2f dirToTarget = Normalized(target - position);
-	const sf::Vector2f desiredVelocity = dirToTarget * maxSpeed;
-	const sf::Vector2f desiredTurnForce = (desiredVelocity - velocity) * turnStrength;
-	const sf::Vector2f acceleration = Clamp(desiredTurnForce, turnStrength);
-
-	velocity = Clamp(velocity + acceleration * deltaTime, maxSpeed);
-	position += velocity * deltaTime;
-}
-
-sf::Vector2f Ant::FindTarget(const World &world)
-{
-	sf::Vector2f target;
-	bool foundTarget = false;
-
-	// Try to find food
-	float closestDistanceToFood = std::numeric_limits<float>::max();
-	const std::vector<Food*> foodObjects = world.GetAllObjectsOfType<Food>();
-
-	for (Food *food : foodObjects)
+	if (!targetFood)
 	{
-		const float distance = Length(food->GetPosition() - position);
+		const std::vector<Food*> allFood = world.GetAllObjectsOfType<Food>();
 
-		if (distance <= viewRadius && distance < closestDistanceToFood)
+		if (!allFood.empty())
 		{
-			foundTarget = true;
-			target = food->GetPosition();
+			// Find the closest food
+			auto closestFoodItr = std::min_element(allFood.begin(), allFood.end(), [&](Food *a, Food *b)
+			{
+				return Length(a->GetPosition() - position) < Length(b->GetPosition() - position);
+			});
+
+			if (Length((*closestFoodItr)->GetPosition() - position) <= viewRadius && (*closestFoodItr)->IsAvailable())
+			{
+				targetFood = *closestFoodItr;
+				targetFood->SetAvailable(false);
+			}
 		}
 	}
-
-	if (foundTarget)
+	else
 	{
-		return target;
+		desiredDirection = Normalized(targetFood->GetPosition() - position);
+
+		if (Length(targetFood->GetPosition() - position) <= pickUpRadius)
+		{
+			targetFood->SetAlive(false);
+			targetFood = nullptr;
+		}
 	}
-	
-	// Move to some random location in the view radius if no target was found
-	auto randomDir = []()
-	{
-		return RandomVec2d() * Random(viewRadius / 2.0f, viewRadius);
-	};
-
-	const float distanceToRandomTarget = Length(randomTarget - position);
-	if (distanceToRandomTarget < viewRadius / 2.0f || distanceToRandomTarget > viewRadius)
-	{
-		randomTarget = position + randomDir();
-	}
-
-	return randomTarget;
 }

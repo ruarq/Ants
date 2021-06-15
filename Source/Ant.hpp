@@ -20,10 +20,12 @@ class Ant final : public Object
 	};
 
 public:
-	static constexpr float maxSpeed = 125.0f;
-	static constexpr float turnStrength = 125.0f;
+	static constexpr float maxSpeed = 50.0f;
+	static constexpr float turnStrength = 50.0f;
+	static constexpr float wanderStrength = 0.1f;
 
 	static constexpr float viewRadius = 75.0f;
+	static constexpr float pickUpRadius = 3.5f;
 
 public:
 	Ant();
@@ -36,15 +38,12 @@ public:
 	sf::Vector2f GetVelocity() const;
 
 private:
-	/**
-	 * @brief Let the ant move towards a certain target
-	 */
-	void MoveTowards(const sf::Vector2f &target, const float deltaTime);
-	sf::Vector2f FindTarget(const World &world);
+	void HandleFood(const World &world);
 
 private:
 	sf::Sprite antSprite;
 	sf::Vector2f velocity;
+	sf::Vector2f desiredDirection;
 
-	sf::Vector2f randomTarget;
+	Food *targetFood = nullptr;
 };

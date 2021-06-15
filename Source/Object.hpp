@@ -16,6 +16,10 @@ public:
 	void SetPosition(const sf::Vector2f &position);
 	sf::Vector2f GetPosition() const;
 
+	void SetAlive(const bool isAlive);
+	bool IsAlive() const;
+
 protected:
 	sf::Vector2f position;
+	bool isAlive = true;
 };

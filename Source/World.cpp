@@ -16,11 +16,24 @@ World::~World()
 
 void World::Update(const float deltaTime)
 {
+	std::vector<Object*> deadObjects;
+
 	for (auto &elem : objectPool)
 	{
-		for (Object *object : elem.second)
+		for (auto objectItr = elem.second.begin(); objectItr != elem.second.end();)
 		{
+			Object *object = *objectItr;
 			object->Update(*this, deltaTime);
+
+			if (!object->IsAlive())
+			{
+				objectItr = elem.second.erase(objectItr);
+				delete object;
+			}
+			else
+			{
+				objectItr++;
+			}
 		}
 	}
 
@@ -29,7 +42,6 @@ void World::Update(const float deltaTime)
 	{
 		objectPool.at(elem.first).push_back(elem.second);
 	}
-
 	spawnQueue.clear();
 }
 
