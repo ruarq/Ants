@@ -14,6 +14,7 @@ Ant::Ant()
 void Ant::Update(World &world, const float deltaTime)
 {
 	this->HandleFood(world);
+	this->HandlePheromones(world, deltaTime);
 
 	desiredDirection = Normalized(desiredDirection + RandomVec2d() * wanderStrength);
 	const sf::Vector2f desiredVelocity = desiredDirection * maxSpeed;
@@ -82,5 +83,29 @@ void Ant::HandleFood(const World &world)
 			targetFood->SetAlive(false);
 			targetFood = nullptr;
 		}
+	}
+}
+
+void Ant::HandlePheromones(World &world, const float deltaTime)
+{
+	pheromoneTimer += deltaTime;
+	if (pheromoneTimer >= 1.0f / pheromoneFrequency)
+	{
+		pheromoneTimer = 0.0f;
+
+		// Choose pheromone type to excrete
+		Pheromone::Type type;
+		if (!targetFood)
+		{
+			type = Pheromone::ToFood;
+		}
+		else if (false /* if the ants carries food */)
+		{
+			type = Pheromone::ToHome;
+		}
+
+		Pheromone *newPheromone = new Pheromone(type);
+		newPheromone->SetPosition(position);
+		world.AddObject(newPheromone);
 	}
 }

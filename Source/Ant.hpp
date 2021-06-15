@@ -11,6 +11,7 @@
 #include "Random.hpp"
 #include "Input.hpp"
 #include "Food.hpp"
+#include "Pheromone.hpp"
 
 class Ant final : public Object
 {
@@ -27,6 +28,8 @@ public:
 	static constexpr float viewRadius = 75.0f;
 	static constexpr float pickUpRadius = 3.5f;
 
+	static constexpr float pheromoneFrequency = 0.5f;
+
 public:
 	Ant();
 
@@ -39,6 +42,7 @@ public:
 
 private:
 	void HandleFood(const World &world);
+	void HandlePheromones(World &world, const float deltaTime);
 
 private:
 	sf::Sprite antSprite;
@@ -46,4 +50,6 @@ private:
 	sf::Vector2f desiredDirection;
 
 	Food *targetFood = nullptr;
+	
+	float pheromoneTimer = 0.0f;
 };
