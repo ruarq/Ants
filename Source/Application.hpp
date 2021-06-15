@@ -4,6 +4,7 @@
 
 #include "ApplicationState.hpp"
 #include "ApplicationStateRunning.hpp"
+#include "Input.hpp"
 
 class Application final
 {

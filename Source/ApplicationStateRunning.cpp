@@ -13,6 +13,12 @@ ApplicationStateRunning::ApplicationStateRunning()
 		newAnt->SetPosition(sf::Vector2f(640.0f, 360.0f));
 		world.AddObject(newAnt);
 	}
+
+	// Spawn some random food
+	for (std::uint32_t i = 0; i < 100; i++)
+	{
+
+	}
 }
 
 ApplicationState* ApplicationStateRunning::Update(const float deltaTime)

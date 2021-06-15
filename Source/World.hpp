@@ -36,7 +36,13 @@ public:
 	template<typename T>
 	std::vector<T*> GetAllObjectsOfType() const
 	{
-		const std::vector<Object*> objects = objectPool.at(Type<T>::Id());
+		const std::uint32_t typeId = Type<T>::Id();
+		if (objectPool.find(typeId) == objectPool.end())
+		{
+			return std::vector<T*>();
+		}
+
+		const std::vector<Object*> objects = objectPool.at(typeId);
 
 		std::vector<T*> castedObjects;
 		std::for_each(objects.begin(), objects.end(), [&castedObjects](Object *object)

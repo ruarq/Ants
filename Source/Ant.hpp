@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iostream>
+#include <limits>
 
 #include <SFML/Graphics.hpp>
 
@@ -9,6 +9,8 @@
 #include "TextureManager.hpp"
 #include "Math.hpp"
 #include "Random.hpp"
+#include "Input.hpp"
+#include "Food.hpp"
 
 class Ant final : public Object
 {
@@ -18,11 +20,10 @@ class Ant final : public Object
 	};
 
 public:
-	static constexpr float maxSpeed = 15.0f;
-	static constexpr float acceleration = 5.0f;
+	static constexpr float maxSpeed = 125.0f;
+	static constexpr float turnStrength = 125.0f;
 
-	static constexpr float turnSpeed = 25.0f;
-	static constexpr float turnFrequency = 15.0f;
+	static constexpr float viewRadius = 75.0f;
 
 public:
 	Ant();
@@ -35,12 +36,15 @@ public:
 	sf::Vector2f GetVelocity() const;
 
 private:
-	void Move(const Direction dir, const float deltaTime);
-	void TurnRandom(const float deltaTime);
+	/**
+	 * @brief Let the ant move towards a certain target
+	 */
+	void MoveTowards(const sf::Vector2f &target, const float deltaTime);
+	sf::Vector2f FindTarget(const World &world);
 
 private:
 	sf::Sprite antSprite;
 	sf::Vector2f velocity;
 
-	float turnTimer = 1.0f / turnFrequency;
+	sf::Vector2f randomTarget;
 };

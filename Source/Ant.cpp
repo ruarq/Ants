@@ -15,14 +15,8 @@ Ant::Ant()
 
 void Ant::Update(World &world, const float deltaTime)
 {
-	this->TurnRandom(deltaTime);
-
-	if (Length(velocity) >= maxSpeed)
-	{
-		velocity = Normalized(velocity) * maxSpeed;
-	}
-
-	position += velocity * deltaTime;
+	const sf::Vector2f target = FindTarget(world);
+	this->MoveTowards(target, deltaTime);
 }
 
 void Ant::Render(sf::RenderWindow &window)
@@ -31,6 +25,16 @@ void Ant::Render(sf::RenderWindow &window)
 	antSprite.setPosition(position);
 	antSprite.setRotation(Angle(velocity));
 	window.draw(antSprite);
+
+	#if defined(DEBUG)
+	sf::CircleShape viewCircle(viewRadius);
+	viewCircle.setFillColor(sf::Color::Transparent);
+	viewCircle.setOutlineColor(sf::Color::Blue);
+	viewCircle.setOutlineThickness(1.0f);
+	viewCircle.setPosition(position);
+	viewCircle.setOrigin(sf::Vector2f(viewRadius, viewRadius));
+	window.draw(viewCircle);
+	#endif
 }
 
 void Ant::SetVelocity(const sf::Vector2f &velocity)
@@ -43,51 +47,56 @@ sf::Vector2f Ant::GetVelocity() const
 	return velocity;
 }
 
-void Ant::Move(const Direction dir, const float deltaTime)
+/**
+ * @note Thanks to Sebastian Lague for sharing his Ant movement script. I like it a lot!
+ */
+void Ant::MoveTowards(const sf::Vector2f &target, const float deltaTime)
 {
-	sf::Vector2f acceleration;
+	const sf::Vector2f dirToTarget = Normalized(target - position);
+	const sf::Vector2f desiredVelocity = dirToTarget * maxSpeed;
+	const sf::Vector2f desiredTurnForce = (desiredVelocity - velocity) * turnStrength;
+	const sf::Vector2f acceleration = Clamp(desiredTurnForce, turnStrength);
 
-	switch (dir)
-	{
-		case Direction::Left:
-		{
-			acceleration = Normalized(sf::Vector2f(velocity.y, -velocity.x)) * this->acceleration * turnSpeed;
-		} break;
-
-		case Direction::Right:
-		{
-			acceleration = Normalized(sf::Vector2f(-velocity.y, velocity.x)) * this->acceleration * turnSpeed;
-
-		} break;
-
-		case Direction::Straight:
-		{
-			acceleration = Normalized(velocity) * this->acceleration;
-		} break;
-	}
-
-	velocity += acceleration * deltaTime;
+	velocity = Clamp(velocity + acceleration * deltaTime, maxSpeed);
+	position += velocity * deltaTime;
 }
 
-void Ant::TurnRandom(const float deltaTime)
+sf::Vector2f Ant::FindTarget(const World &world)
 {
-	turnTimer -= deltaTime;
-	
-	if (turnTimer <= 0.0f)
-	{
-		turnTimer = 1.0f / turnFrequency;
+	sf::Vector2f target;
+	bool foundTarget = false;
 
-		if (Random() < 0.5f)
-		{
-			Move(Direction::Left, deltaTime);
-		}
-		else
-		{
-			Move(Direction::Right, deltaTime);
-		}
-	}
-	else
+	// Try to find food
+	float closestDistanceToFood = std::numeric_limits<float>::max();
+	const std::vector<Food*> foodObjects = world.GetAllObjectsOfType<Food>();
+
+	for (Food *food : foodObjects)
 	{
-		Move(Direction::Straight, deltaTime);
+		const float distance = Length(food->GetPosition() - position);
+
+		if (distance <= viewRadius && distance < closestDistanceToFood)
+		{
+			foundTarget = true;
+			target = food->GetPosition();
+		}
 	}
+
+	if (foundTarget)
+	{
+		return target;
+	}
+	
+	// Move to some random location in the view radius if no target was found
+	auto randomDir = []()
+	{
+		return RandomVec2d() * Random(viewRadius / 2.0f, viewRadius);
+	};
+
+	const float distanceToRandomTarget = Length(randomTarget - position);
+	if (distanceToRandomTarget < viewRadius / 2.0f || distanceToRandomTarget > viewRadius)
+	{
+		randomTarget = position + randomDir();
+	}
+
+	return randomTarget;
 }

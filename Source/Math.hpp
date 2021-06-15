@@ -63,5 +63,24 @@ float Angle(const T &a, const T &b)
 template<typename T>
 float Angle(const T &vec)
 {
-	return std::atan2(vec.y, vec.x) * (180.0f / M_PI) + 90;
+	return std::atan2(vec.y, vec.x) * (180.0f / M_PI) + 90.0f;
+}
+
+/**
+ * @brief Clamp the length of a 2d vector
+ * @tparam T The type of the vector
+ * @param vec The vector to be clamped
+ * @return Clamped vector
+ */
+template<typename T>
+sf::Vector2<T> Clamp(const sf::Vector2<T> &vec, const T length)
+{
+	if (Length(vec) > length)
+	{
+		return Normalized(vec) * length;
+	}
+	else
+	{
+		return vec;
+	}
 }

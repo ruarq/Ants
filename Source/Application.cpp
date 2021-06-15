@@ -7,6 +7,8 @@ void Application::Run()
 	window.create(sf::VideoMode(1280, 720), "Ants! Simulation - C++17 & SFML2.5.1", sf::Style::Close | sf::Style::Titlebar);
 	window.setFramerateLimit(60);
 
+	Input::SetWindow(window);
+
 	state = new ApplicationStateRunning();
 
 	while (window.isOpen())
