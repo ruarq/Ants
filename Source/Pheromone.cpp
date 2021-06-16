@@ -30,7 +30,7 @@ void Pheromone::Render(sf::RenderWindow &window)
 			break;
 	}
 
-	window.draw(shape);
+	// window.draw(shape);
 }
 
 Pheromone::Type Pheromone::GetType() const

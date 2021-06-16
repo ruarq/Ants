@@ -27,8 +27,7 @@ void Ant::Update(World &world, const float deltaTime)
 	// silly out of bounds check
 	if (position.x + velocity.x <= 0.0f || position.y + velocity.y <= 0.0f || position.x + velocity.x >= 1280.0f || position.y + velocity.y >= 720.0f)
 	{
-		velocity *= -1.0f;
-		desiredDirection = Normalized(velocity);
+		this->TurnAround();
 	}
 }
 
@@ -188,6 +187,6 @@ bool Ant::IsInView(const sf::Vector2f &position) const
 
 void Ant::TurnAround()
 {
-	velocity *= 0.5f;
+	velocity *= -1.0f;
 	desiredDirection *= -1.0f;
 }

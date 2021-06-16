@@ -12,7 +12,7 @@ ApplicationStateRunning::ApplicationStateRunning()
 	world.AddObject(home);
 
 	// Create some ants
-	for (std::uint32_t i = 0; i < 32; i++)
+	for (std::uint32_t i = 0; i < 16; i++)
 	{
 		Ant *newAnt = new Ant();
 		newAnt->SetPosition(sf::Vector2f(640.0f, 360.0f));
@@ -24,6 +24,20 @@ ApplicationStateRunning::ApplicationStateRunning()
 	{
 		Food *newFood = new Food();
 		newFood->SetPosition(sf::Vector2f(Random(300.0f, 310.0f), Random(300.0f, 310.0f)));
+		world.AddObject(newFood);
+	}
+
+	for (std::uint32_t i = 0; i < 100; i++)
+	{
+		Food *newFood = new Food();
+		newFood->SetPosition(sf::Vector2f(Random(600.0f, 610.0f), Random(600.0f, 610.0f)));
+		world.AddObject(newFood);
+	}
+
+	for (std::uint32_t i = 0; i < 100; i++)
+	{
+		Food *newFood = new Food();
+		newFood->SetPosition(sf::Vector2f(Random(890.0f, 900.0f), Random(630.0f, 640.0f)));
 		world.AddObject(newFood);
 	}
 }

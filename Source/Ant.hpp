@@ -22,8 +22,8 @@ class Ant final : public Object
 	};
 
 public:
-	static constexpr float maxSpeed = 50.0f;
-	static constexpr float turnStrength = 50.0f;
+	static constexpr float maxSpeed = 75.0f;
+	static constexpr float turnStrength = 100.0f;
 	static constexpr float wanderStrength = 0.1f;
 
 	static constexpr float viewRadius = 75.0f;
