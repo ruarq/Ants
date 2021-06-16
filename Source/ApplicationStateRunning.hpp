@@ -6,6 +6,7 @@
 #include "World.hpp"
 #include "Ant.hpp"
 #include "Food.hpp"
+#include "Home.hpp"
 
 class ApplicationStateRunning final : public ApplicationState
 {

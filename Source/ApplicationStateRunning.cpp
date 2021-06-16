@@ -6,8 +6,13 @@ ApplicationStateRunning::ApplicationStateRunning()
 	antTexture.loadFromFile("Resources/Ant.png");
 	TextureManager::AddTexture("Ant", antTexture);
 
+	// Create a home
+	Home *home = new Home();
+	home->SetPosition(sf::Vector2f(640.0f, 360.0f));
+	world.AddObject(home);
+
 	// Create some ants
-	for (std::uint32_t i = 0; i < 100; i++)
+	for (std::uint32_t i = 0; i < 32; i++)
 	{
 		Ant *newAnt = new Ant();
 		newAnt->SetPosition(sf::Vector2f(640.0f, 360.0f));
@@ -15,10 +20,10 @@ ApplicationStateRunning::ApplicationStateRunning()
 	}
 
 	// Spawn some random food
-	for (std::uint32_t i = 0; i < 1000; i++)
+	for (std::uint32_t i = 0; i < 100; i++)
 	{
 		Food *newFood = new Food();
-		newFood->SetPosition(sf::Vector2f(Random(100.0f, 1180.0f), Random(100.0f, 620.0f)));
+		newFood->SetPosition(sf::Vector2f(Random(300.0f, 310.0f), Random(300.0f, 310.0f)));
 		world.AddObject(newFood);
 	}
 }

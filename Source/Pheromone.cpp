@@ -22,7 +22,7 @@ void Pheromone::Render(sf::RenderWindow &window)
 	switch (type)
 	{
 		case Pheromone::ToHome:
-			shape.setFillColor(sf::Color::Cyan);
+			shape.setFillColor(sf::Color::Blue);
 			break;
 
 		case Pheromone::ToFood:
@@ -31,4 +31,9 @@ void Pheromone::Render(sf::RenderWindow &window)
 	}
 
 	window.draw(shape);
+}
+
+Pheromone::Type Pheromone::GetType() const
+{
+	return type;
 }

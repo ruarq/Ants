@@ -3,7 +3,7 @@
 Food::Food()
 {
 	shape.setRadius(2.5f);
-	shape.setOrigin(sf::Vector2f(shape.getRadius() / 2.0f, shape.getRadius() / 2.0f));
+	shape.setOrigin(shape.getRadius(), shape.getRadius());
 	shape.setFillColor(sf::Color::Green);
 }
 
