@@ -2,7 +2,7 @@
 Ant simulation in C++ using SFML2.5.1
 
 # TODO-List
-[ ] Quadtree
+[x] Quadtree
 [ ] Walls
 [ ] User interface
 	[ ] Menu
