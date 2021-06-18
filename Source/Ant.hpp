@@ -22,13 +22,13 @@ class Ant final : public Object
 	};
 
 public:
-	static constexpr float maxSpeed = 75.0f;
-	static constexpr float turnStrength = 100.0f;
+	static constexpr float maxSpeed = 50.0f;
+	static constexpr float turnStrength = 75.0f;
 	static constexpr float wanderStrength = 0.1f;
 
 	static constexpr float viewRadius = 75.0f;
 	static constexpr float viewAngle = 90.0f;
-	static constexpr float pickUpRadius = 3.5f;
+	static constexpr float interactionRadius = 7.5f;
 
 	static constexpr float pheromoneFrequency = 4.0f;
 
