@@ -8,7 +8,7 @@
 class Pheromone final : public Object
 {
 public:
-	static constexpr float lifeTime = 45.0f;
+	static constexpr float lifeTime = 30.0f;
 
 public:
 	enum Type { ToHome = 0, ToFood };
