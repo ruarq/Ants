@@ -34,23 +34,15 @@ public:
 	}
 
 	template<typename T>
-	std::vector<T*> GetAllObjectsOfType() const
+	std::vector<Object*> GetAllObjectsOfType() const
 	{
 		const std::uint32_t typeId = Type<T>::Id();
 		if (objectPool.find(typeId) == objectPool.end())
 		{
-			return std::vector<T*>();
+			return std::vector<Object*>();
 		}
 
-		const std::vector<Object*> objects = objectPool.at(typeId);
-
-		std::vector<T*> castedObjects;
-		std::for_each(objects.begin(), objects.end(), [&castedObjects](Object *object)
-		{
-			castedObjects.push_back(dynamic_cast<T*>(object));
-		});
-
-		return castedObjects;
+		return objectPool.at(typeId);
 	}
 
 private:
