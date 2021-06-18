@@ -7,6 +7,7 @@
 #include "Ant.hpp"
 #include "Food.hpp"
 #include "Home.hpp"
+#include "Random.hpp"
 
 class ApplicationStateRunning final : public ApplicationState
 {
@@ -19,4 +20,5 @@ public:
 
 private:
 	World world;
+	sf::View view;
 };
