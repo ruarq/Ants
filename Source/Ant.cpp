@@ -6,7 +6,7 @@ Ant::Ant()
 	const sf::Texture &antTexture = TextureManager::GetTexture("Ant");
 	antSprite.setTexture(antTexture);
 	antSprite.setOrigin(static_cast<sf::Vector2f>(antTexture.getSize() / 2u));
-	antSprite.setScale(sf::Vector2f(0.8f, 0.8f));
+	antSprite.setScale(0.5f, 0.5f);
 
 	velocity = RandomVec2d();
 }
@@ -23,12 +23,6 @@ void Ant::Update(World &world, const float deltaTime)
 
 	velocity = Clamp(velocity + acceleration * deltaTime, maxSpeed);
 	position += velocity * deltaTime;
-
-	// silly out of bounds check
-	if (position.x + velocity.x <= 0.0f || position.y + velocity.y <= 0.0f || position.x + velocity.x >= 1280.0f || position.y + velocity.y >= 720.0f)
-	{
-		this->TurnAround();
-	}
 }
 
 void Ant::Render(sf::RenderWindow &window)
@@ -37,16 +31,6 @@ void Ant::Render(sf::RenderWindow &window)
 	antSprite.setPosition(position);
 	antSprite.setRotation(Angle(velocity));
 	window.draw(antSprite);
-
-	// #if defined(DEBUG)
-	// sf::CircleShape viewCircle(viewRadius);
-	// viewCircle.setFillColor(sf::Color::Transparent);
-	// viewCircle.setOutlineColor(sf::Color::Blue);
-	// viewCircle.setOutlineThickness(1.0f);
-	// viewCircle.setPosition(position);
-	// viewCircle.setOrigin(sf::Vector2f(viewRadius, viewRadius));
-	// window.draw(viewCircle);
-	// #endif
 }
 
 void Ant::SetVelocity(const sf::Vector2f &velocity)
@@ -63,19 +47,21 @@ void Ant::HandleFood(const World &world)
 {
 	if (!targetFood)
 	{
-		const std::vector<Food*> allFood = world.GetAllObjectsOfType<Food>();
+		const std::vector<Object*> allFood = world.GetAllObjectsOfType<Food>();
 
 		if (!allFood.empty())
 		{
 			// Find the closest food
-			auto closestFoodItr = std::min_element(allFood.begin(), allFood.end(), [&](Food *a, Food *b)
+			auto closestFoodItr = std::min_element(allFood.begin(), allFood.end(), [&](Object *a, Object *b)
 			{
 				return Length(a->GetPosition() - position) < Length(b->GetPosition() - position);
 			});
 
-			if (this->IsInView((*closestFoodItr)->GetPosition()) && (*closestFoodItr)->IsAvailable())
+			Food *closestFood = dynamic_cast<Food*>(*closestFoodItr);
+
+			if (this->IsInView(closestFood->GetPosition()) && closestFood->IsAvailable())
 			{
-				targetFood = *closestFoodItr;
+				targetFood = closestFood;
 				targetFood->SetAvailable(false);
 			}
 		}
@@ -90,19 +76,19 @@ void Ant::HandleFood(const World &world)
 	{
 		if (carriesFood)
 		{
-			targetFood->SetPosition(position);
+			targetFood->SetPosition(position + Normalized(velocity) * interactionRadius);
 
 			this->FollowPheromones(world, Pheromone::ToHome);
 
 			// Search for ant homes to drop the food off
-			const std::vector<Home*> antHomes = world.GetAllObjectsOfType<Home>();
-			for (Home *home : antHomes)
+			const std::vector<Object*> antHomes = world.GetAllObjectsOfType<Home>();
+			for (Object *home : antHomes)
 			{
 				if (this->IsInView(home->GetPosition()))
 				{
 					desiredDirection = Normalized(home->GetPosition() - position);
 				}
-				else if (Length(home->GetPosition() - position) <= pickUpRadius)
+				else if (Length(home->GetPosition() - position) <= interactionRadius)
 				{
 					// TODO:
 					// home->AddFood(targetFood);
@@ -114,7 +100,7 @@ void Ant::HandleFood(const World &world)
 				}
 			}
 		}
-		else if (Length(targetFood->GetPosition() - position) <= pickUpRadius)
+		else if (Length(targetFood->GetPosition() - position) <= interactionRadius)
 		{
 			carriesFood = true;
 			this->TurnAround();
@@ -154,9 +140,10 @@ void Ant::FollowPheromones(const World &world, const Pheromone::Type type)
 {
 	std::vector<sf::Vector2f> pheromonePositions;
 
-	const std::vector<Pheromone*> allPheromones = world.GetAllObjectsOfType<Pheromone>();
-	for (Pheromone *pheromone : allPheromones)
+	const std::vector<Object*> allPheromones = world.GetAllObjectsOfType<Pheromone>();
+	for (Object *object : allPheromones)
 	{
+		Pheromone *pheromone = dynamic_cast<Pheromone*>(object);
 		if (pheromone->GetType() == type && this->IsInView(pheromone->GetPosition()))
 		{
 			pheromonePositions.push_back(pheromone->GetPosition());
