@@ -5,6 +5,7 @@
 #include <array>
 
 #include "Object.hpp"
+#include "Math.hpp"
 
 class Quadtree final
 {
@@ -43,12 +44,14 @@ private:
 		void Insert(Object *object) override;
 		void Destroy() override;
 
-		std::vector<Object*> GetNeighbors(const Object *object) const;
+		std::vector<Object*> Query(const sf::Vector2f &point) const;
+		std::vector<Object*> Query(const sf::Vector2f &point, const float radius) const;
 
 		void Render(sf::RenderWindow &window);
 
 	private:
-		std::uint32_t GetNodeIndex(const Object *object, sf::Vector2f *nodePos = nullptr) const;
+		std::uint32_t GetNodeIndex(const sf::Vector2f &point, sf::Vector2f *nodePos = nullptr) const;
+		std::vector<Object*> Query(const std::uint32_t nodeIndex) const;
 
 	private:
 		const Quadtree &quadtree;
@@ -64,8 +67,8 @@ public:
 	void Insert(Object *object);
 	void Clear();
 
-	std::vector<Object*> GetNeighbors(const Object *object) const;
-	// std::vector<Object*> GetNeighbors(const sf::Vector2f &position) const;
+	std::vector<Object*> Query(const sf::Vector2f &point) const;
+	std::vector<Object*> Query(const sf::Vector2f &point, const float radius) const;
 
 	void Render(sf::RenderWindow &window);
 

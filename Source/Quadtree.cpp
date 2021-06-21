@@ -41,7 +41,7 @@ Quadtree::Quad::Quad(const Quadtree &quadtree, const sf::Vector2f &position, con
 void Quadtree::Quad::Insert(Object *object)
 {
 	sf::Vector2f quadPos;
-	const std::uint32_t nodeIndex = this->GetNodeIndex(object, &quadPos);
+	const std::uint32_t nodeIndex = this->GetNodeIndex(object->GetPosition(), &quadPos);
 
 	Node* &node = nodes[nodeIndex];
 
@@ -80,9 +80,9 @@ void Quadtree::Quad::Destroy()
 	}
 }
 
-std::vector<Object*> Quadtree::Quad::GetNeighbors(const Object *object) const
+std::vector<Object*> Quadtree::Quad::Query(const sf::Vector2f &point) const
 {
-	const std::uint32_t nodeIndex = this->GetNodeIndex(object);
+	const std::uint32_t nodeIndex = this->GetNodeIndex(point);
 
 	if (Region *region = dynamic_cast<Region*>(nodes[nodeIndex]))
 	{
@@ -90,12 +90,65 @@ std::vector<Object*> Quadtree::Quad::GetNeighbors(const Object *object) const
 	}
 	else if (Quad *quad = dynamic_cast<Quad*>(nodes[nodeIndex]))
 	{
-		return quad->GetNeighbors(object);
+		return quad->Query(point);
 	}
 	else
 	{
 		return std::vector<Object*>();
 	}
+}
+
+std::vector<Object*> Quadtree::Quad::Query(const sf::Vector2f &point, const float radius) const
+{
+	std::vector<Object*> objects;
+	const sf::Vector2f regionSize = size / 2.0f;
+	const sf::Vector2f center = position + regionSize;
+
+	auto Intersect = [&](const sf::FloatRect &rect)
+	{
+		const sf::Vector2f rayToRect = sf::Vector2f(rect.left + rect.width / 2.0f, rect.top + rect.height / 2.0f) - point;
+		return rect.contains(point + Normalized(rayToRect) * radius) || Length(rayToRect) <= radius;
+	};
+
+	auto AddObjectsFromNode = [&](const std::uint32_t nodeIndex)
+	{
+		if (Region *region = dynamic_cast<Region*>(nodes[nodeIndex]))
+		{
+			std::vector<Object*> regionsObjects = region->Objects();
+			objects.insert(objects.end(), regionsObjects.begin(), regionsObjects.end());
+		}
+		else if (Quad *quad = dynamic_cast<Quad*>(nodes[nodeIndex]))
+		{
+			std::vector<Object*> quadsObjects = quad->Query(point, radius);
+			objects.insert(objects.end(), quadsObjects.begin(), quadsObjects.end());
+		}
+	};
+
+	// top-left
+	if (Intersect(sf::FloatRect(position, regionSize)))
+	{
+		AddObjectsFromNode(0);
+	}
+
+	// top-right
+	if (Intersect(sf::FloatRect(sf::Vector2f(center.x, position.y), regionSize)))
+	{
+		AddObjectsFromNode(1);
+	}
+
+	// bottom-left
+	if (Intersect(sf::FloatRect(sf::Vector2f(position.x, center.y), regionSize)))
+	{
+		AddObjectsFromNode(2);
+	}
+
+	// bottom-right
+	if (Intersect(sf::FloatRect(center, regionSize)))
+	{
+		AddObjectsFromNode(3);
+	}
+
+	return objects;
 }
 
 void Quadtree::Quad::Render(sf::RenderWindow &window)
@@ -132,14 +185,12 @@ void Quadtree::Quad::Render(sf::RenderWindow &window)
 	}
 }
 
-std::uint32_t Quadtree::Quad::GetNodeIndex(const Object *object, sf::Vector2f *nodePos) const
+std::uint32_t Quadtree::Quad::GetNodeIndex(const sf::Vector2f &point, sf::Vector2f *nodePos) const
 {
 	std::uint32_t nodeIndex;
 	const sf::Vector2f center = position + size / 2.0f;
 
-	const sf::Vector2f objectPos = object->GetPosition();
-
-	if (objectPos.x <= center.x && objectPos.y <= center.y) // top-left
+	if (point.x <= center.x && point.y <= center.y) // top-left
 	{
 		nodeIndex = 0;
 		
@@ -148,7 +199,7 @@ std::uint32_t Quadtree::Quad::GetNodeIndex(const Object *object, sf::Vector2f *n
 			*nodePos = position;
 		}
 	}
-	else if (objectPos.x > center.x && objectPos.y <= center.y) // top-right
+	else if (point.x > center.x && point.y <= center.y) // top-right
 	{
 		nodeIndex = 1;
 
@@ -157,7 +208,7 @@ std::uint32_t Quadtree::Quad::GetNodeIndex(const Object *object, sf::Vector2f *n
 			*nodePos = sf::Vector2f(center.x, position.y);
 		}
 	}
-	else if (objectPos.x <= center.x && objectPos.y > center.y) // bottom-left
+	else if (point.x <= center.x && point.y > center.y) // bottom-left
 	{
 		nodeIndex = 2;
 
@@ -166,7 +217,7 @@ std::uint32_t Quadtree::Quad::GetNodeIndex(const Object *object, sf::Vector2f *n
 			*nodePos = sf::Vector2f(position.x, center.y);
 		}
 	}
-	else if (objectPos.x > center.x && objectPos.y > center.y) // bottom-right
+	else if (point.x > center.x && point.y > center.y) // bottom-right
 	{
 		nodeIndex = 3;
 
@@ -205,14 +256,23 @@ void Quadtree::Clear()
 	root->Destroy();
 }
 
-std::vector<Object*> Quadtree::GetNeighbors(const Object *object) const
+std::vector<Object*> Quadtree::Query(const sf::Vector2f &point) const
 {
-	if (sf::FloatRect(sf::Vector2f(), size).contains(object->GetPosition()))
+	if (sf::FloatRect(sf::Vector2f(), size).contains(point))
 	{
-		std::vector<Object*> neighbors = root->GetNeighbors(object);
-		std::remove(neighbors.begin(), neighbors.end(), object);
+		return root->Query(point);
+	}
+	else
+	{
+		return std::vector<Object*>();
+	}
+}
 
-		return neighbors;
+std::vector<Object*> Quadtree::Query(const sf::Vector2f &point, const float radius) const
+{
+	if (sf::FloatRect(sf::Vector2f(), size).contains(point))
+	{
+		return root->Query(point, radius);
 	}
 	else
 	{

@@ -1,7 +1,7 @@
 #include "World.hpp"
 
 World::World()
-	: quadtree(sf::Vector2f(1280.0f, 720.0f), 512)
+	: quadtree(sf::Vector2f(1280.0f, 720.0f), 512, 8)
 {
 }
 
@@ -56,6 +56,23 @@ void World::Render(sf::RenderWindow &window)
 	#if defined(DEBUG)
 	quadtree.Render(window);
 	#endif
+
+	sf::CircleShape shape;
+	shape.setRadius(75.0f);
+	shape.setOrigin(shape.getRadius(), shape.getRadius());
+	shape.setPosition((sf::Vector2f)sf::Mouse::getPosition(window));
+	shape.setFillColor(sf::Color::Transparent);
+	shape.setOutlineColor(sf::Color::Red);
+	shape.setOutlineThickness(1.0f);
+	window.draw(shape);
+	for (Object *object : quadtree.Query(shape.getPosition(), shape.getRadius()))
+	{
+		shape.setRadius(1.0f);
+		shape.setOrigin(shape.getRadius(), shape.getRadius());
+		shape.setPosition(object->GetPosition());
+		shape.setFillColor(sf::Color::Red);
+		window.draw(shape);
+	}
 }
 
 void World::AddObject(Object *object)
@@ -63,12 +80,12 @@ void World::AddObject(Object *object)
 	spawnQueue.push_back(object);
 }
 
-std::vector<Object*> World::GetNeighbors(const Object *object) const
+std::vector<Object*> World::Query(const sf::Vector2f &point) const
 {
-	return quadtree.GetNeighbors(object);
+	return quadtree.Query(point);
 }
 
-// std::vector<Object*> World::GetNeighbors(const sf::Vector2f &position) const
-// {
-// 	return quadtree.GetNeighbors(position);
-// }
+std::vector<Object*> World::Query(const sf::Vector2f &point, const float radius) const
+{
+	return quadtree.Query(point, radius);
+}

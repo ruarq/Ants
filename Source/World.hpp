@@ -21,8 +21,8 @@ public:
 	void Render(sf::RenderWindow &window);
 
 	void AddObject(Object *object);
-	std::vector<Object*> GetNeighbors(const Object *object) const;
-	// std::vector<Object*> GetNeighbors(const sf::Vector2f &position) const;
+	std::vector<Object*> Query(const sf::Vector2f &point) const;
+	std::vector<Object*> Query(const sf::Vector2f &point, const float radius) const;
 
 private:
 	std::vector<Object*> objects;

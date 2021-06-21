@@ -53,9 +53,11 @@ void Ant::HandleFood(const World &world)
 {
 	if (!targetFood)
 	{
-		std::vector<Object*> neighbors = world.GetNeighbors(this);
-		// std::vector<Object*> neighbors2 = world.GetNeighbors(position + Normalized(velocity) * viewRadius);
-		// neighbors.insert(neighbors.end(), neighbors2.begin(), neighbors2.end());
+		std::vector<Object*> neighbors = world.Query(position, viewRadius);
+		std::remove_if(neighbors.begin(), neighbors.end(), [](Object *object)
+		{
+			return !dynamic_cast<Food*>(object);
+		});
 
 		if (!neighbors.empty())
 		{
@@ -90,7 +92,7 @@ void Ant::HandleFood(const World &world)
 			this->FollowPheromones(world, Pheromone::ToHome);
 
 			// Search for ant homes to drop the food off
-			for (Object *object : world.GetNeighbors(this))
+			for (Object *object : world.Query(position, viewRadius))
 			{
 				if (Home *home = dynamic_cast<Home*>(object))
 				{
@@ -151,7 +153,7 @@ void Ant::FollowPheromones(const World &world, const Pheromone::Type type)
 {
 	std::vector<sf::Vector2f> pheromonePositions;
 
-	for (Object *object : world.GetNeighbors(this))
+	for (Object *object : world.Query(position, viewRadius))
 	{
 		if (Pheromone *pheromone = dynamic_cast<Pheromone*>(object))
 		{
