@@ -30,7 +30,7 @@ public:
 	static constexpr float viewAngle = 90.0f;
 	static constexpr float interactionRadius = 7.5f;
 
-	static constexpr float pheromoneFrequency = 4.0f;
+	static constexpr float pheromoneFrequency = 2.0f;
 
 public:
 	Ant();

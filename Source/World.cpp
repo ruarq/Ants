@@ -1,57 +1,74 @@
 #include "World.hpp"
 
+World::World()
+	: quadtree(sf::Vector2f(1280.0f, 720.0f), 512)
+{
+}
+
 World::~World()
 {
-	for (auto &elem : objectPool)
+
+	for (Object *object : objects)
 	{
-		for (Object *object : elem.second)
+		if (object)
 		{
-			if (object)
-			{
-				delete object;
-			}
+			delete object;
 		}
 	}
 }
 
 void World::Update(const float deltaTime)
 {
-	std::vector<Object*> deadObjects;
+	// Insert the spawnQueue into the objectPool
+	objects.insert(objects.end(), spawnQueue.begin(), spawnQueue.end());
+	spawnQueue.clear();
 
-	for (auto &elem : objectPool)
+	quadtree.Clear();
+	for (Object *object : objects)
 	{
-		for (auto objectItr = elem.second.begin(); objectItr != elem.second.end();)
-		{
-			Object *object = *objectItr;
-			object->Update(*this, deltaTime);
+		quadtree.Insert(object);
+	}
 
-			if (!object->IsAlive())
-			{
-				objectItr = elem.second.erase(objectItr);
-				delete object;
-			}
-			else
-			{
-				objectItr++;
-			}
+	for (auto objectItr = objects.begin(); objectItr != objects.end();)
+	{
+		Object *object = *objectItr;
+		object->Update(*this, deltaTime);
+
+		if (!object->IsAlive())
+		{
+			objectItr = objects.erase(objectItr);
+			delete object;
+		}
+		else
+		{
+			objectItr++;
 		}
 	}
-
-	// Insert the spawnQueue into the objectPool
-	for (auto &elem : spawnQueue)
-	{
-		objectPool.at(elem.first).push_back(elem.second);
-	}
-	spawnQueue.clear();
 }
 
 void World::Render(sf::RenderWindow &window)
 {
-	for (auto &elem : objectPool)
+	for (Object *object : objects)
 	{
-		for (Object *object : elem.second)
-		{
-			object->Render(window);
-		}
+		object->Render(window);
 	}
+
+	#if defined(DEBUG)
+	quadtree.Render(window);
+	#endif
 }
+
+void World::AddObject(Object *object)
+{
+	spawnQueue.push_back(object);
+}
+
+std::vector<Object*> World::GetNeighbors(const Object *object) const
+{
+	return quadtree.GetNeighbors(object);
+}
+
+// std::vector<Object*> World::GetNeighbors(const sf::Vector2f &position) const
+// {
+// 	return quadtree.GetNeighbors(position);
+// }

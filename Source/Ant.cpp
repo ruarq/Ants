@@ -23,6 +23,12 @@ void Ant::Update(World &world, const float deltaTime)
 
 	velocity = Clamp(velocity + acceleration * deltaTime, maxSpeed);
 	position += velocity * deltaTime;
+
+	// Just wrap the ants position for now (weird flex)
+	if (position.x < 0.0f) position.x = 1280.0f;
+	if (position.x > 1280.0f) position.x = 0.0f;
+	if (position.y < 0.0f) position.y = 720.0f;
+	if (position.y > 720.0f) position.y = 0.0f;
 }
 
 void Ant::Render(sf::RenderWindow &window)
@@ -47,22 +53,25 @@ void Ant::HandleFood(const World &world)
 {
 	if (!targetFood)
 	{
-		const std::vector<Object*> allFood = world.GetAllObjectsOfType<Food>();
+		std::vector<Object*> neighbors = world.GetNeighbors(this);
+		// std::vector<Object*> neighbors2 = world.GetNeighbors(position + Normalized(velocity) * viewRadius);
+		// neighbors.insert(neighbors.end(), neighbors2.begin(), neighbors2.end());
 
-		if (!allFood.empty())
+		if (!neighbors.empty())
 		{
 			// Find the closest food
-			auto closestFoodItr = std::min_element(allFood.begin(), allFood.end(), [&](Object *a, Object *b)
+			auto closestNeighbor = std::min_element(neighbors.begin(), neighbors.end(), [&](Object *a, Object *b)
 			{
 				return Length(a->GetPosition() - position) < Length(b->GetPosition() - position);
 			});
 
-			Food *closestFood = dynamic_cast<Food*>(*closestFoodItr);
-
-			if (this->IsInView(closestFood->GetPosition()) && closestFood->IsAvailable())
+			if (Food *closestFood = dynamic_cast<Food*>(*closestNeighbor))
 			{
-				targetFood = closestFood;
-				targetFood->SetAvailable(false);
+				if (this->IsInView(closestFood->GetPosition()) && closestFood->IsAvailable())
+				{
+					targetFood = closestFood;
+					targetFood->SetAvailable(false);
+				}
 			}
 		}
 
@@ -81,22 +90,24 @@ void Ant::HandleFood(const World &world)
 			this->FollowPheromones(world, Pheromone::ToHome);
 
 			// Search for ant homes to drop the food off
-			const std::vector<Object*> antHomes = world.GetAllObjectsOfType<Home>();
-			for (Object *home : antHomes)
+			for (Object *object : world.GetNeighbors(this))
 			{
-				if (this->IsInView(home->GetPosition()))
+				if (Home *home = dynamic_cast<Home*>(object))
 				{
-					desiredDirection = Normalized(home->GetPosition() - position);
-				}
-				else if (Length(home->GetPosition() - position) <= interactionRadius)
-				{
-					// TODO:
-					// home->AddFood(targetFood);
-					targetFood->SetAlive(false);
-					targetFood = nullptr;
-					carriesFood = false;
+					if (this->IsInView(home->GetPosition()))
+					{
+						desiredDirection = Normalized(home->GetPosition() - position);
+					}
+					else if (Length(home->GetPosition() - position) <= interactionRadius)
+					{
+						// TODO:
+						// home->AddFood(targetFood);
+						targetFood->SetAlive(false);
+						targetFood = nullptr;
+						carriesFood = false;
 
-					this->TurnAround();
+						this->TurnAround();
+					}
 				}
 			}
 		}
@@ -140,13 +151,14 @@ void Ant::FollowPheromones(const World &world, const Pheromone::Type type)
 {
 	std::vector<sf::Vector2f> pheromonePositions;
 
-	const std::vector<Object*> allPheromones = world.GetAllObjectsOfType<Pheromone>();
-	for (Object *object : allPheromones)
+	for (Object *object : world.GetNeighbors(this))
 	{
-		Pheromone *pheromone = dynamic_cast<Pheromone*>(object);
-		if (pheromone->GetType() == type && this->IsInView(pheromone->GetPosition()))
+		if (Pheromone *pheromone = dynamic_cast<Pheromone*>(object))
 		{
-			pheromonePositions.push_back(pheromone->GetPosition());
+			if (pheromone->GetType() == type && this->IsInView(pheromone->GetPosition()))
+			{
+				pheromonePositions.push_back(pheromone->GetPosition());
+			}
 		}
 	}
 

@@ -3,7 +3,6 @@
 ApplicationStateRunning::ApplicationStateRunning()
 {
 	view.setSize(1280.0f, 720.0f);
-	view.setCenter(0.0f, 0.0f);
 
 	sf::Texture antTexture;
 	antTexture.loadFromFile("Resources/Ant.png");
@@ -11,10 +10,11 @@ ApplicationStateRunning::ApplicationStateRunning()
 
 	// Create a home
 	Home *home = new Home();
+	home->SetPosition(sf::Vector2f(400.0f, 400.0f));
 	world.AddObject(home);
 
 	// Create some ants
-	for (std::uint32_t i = 0; i < 64; i++)
+	for (std::uint32_t i = 0; i < 1000; i++)
 	{
 		Ant *newAnt = new Ant();
 		newAnt->SetPosition(home->GetPosition());
