@@ -16,11 +16,6 @@
 
 class Ant final : public Object
 {
-	enum class Direction
-	{
-		Straight, Left, Right
-	};
-
 public:
 	static constexpr float maxSpeed = 50.0f;
 	static constexpr float turnStrength = 75.0f;
